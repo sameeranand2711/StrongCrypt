@@ -1,0 +1,69 @@
+# StrongCrypt — repository ignore rules
+
+## Agent runtime logs (must never be committed; may contain transient detail)
+agent_logs/
+
+## .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+artifacts/
+publish/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+!packages/build/
+.nuget/
+project.lock.json
+project.assets.json
+
+## Test / coverage output
+[Tt]est[Rr]esult*/
+TestResults/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+*.trx
+BenchmarkDotNet.Artifacts/
+
+## IDE / editor artifacts
+.vs/
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+_ReSharper*/
+*.DotSettings.user
+
+## OS artifacts
+[Tt]humbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+## Secrets and local-only material (never commit)
+*.pfx
+*.p12
+*.snk
+*.key
+*.pem
+secrets.json
+appsettings.*.local.json
+.env
+.env.*
+local.settings.json
