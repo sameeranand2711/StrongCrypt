@@ -1,0 +1,21 @@
+<Project>
+
+  <!-- Production-project settings. Inherits the repository root props. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <!-- Public API must be documented (DEVELOPMENT_STANDARDS.md). -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Library metadata. Publishing is NOT authorized for V1. -->
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>1.0.0-alpha</Version>
+    <PackageValidationBaselineVersion></PackageValidationBaselineVersion>
+
+    <!-- Production code is audited: keep analyzer coverage strict. -->
+    <AnalysisMode>Recommended</AnalysisMode>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+</Project>

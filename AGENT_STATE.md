@@ -2,15 +2,18 @@
 
 ## Repository
 
-- `ASSUMPTION`: Repository contents have not yet been inspected by the executing agent.
-- Intended feature branch when no project policy exists: `feature/strongcrypt-v1`.
+- `VERIFIED`: Repository inspected. It contained only the governing pack documents (no pre-existing application code), so bootstrap overwrote no user work.
+- `VERIFIED`: Git initialized by Agent 01 during `SC-T00`. Baseline commit on `main`; all V1 work on `feature/strongcrypt-v1`.
+- `VERIFIED`: SDK `10.0.101` present; `global.json` pins it with `latestFeature` roll-forward.
+- Layout: `StrongCrypt.sln`; `src/{StrongCrypt.Protocol,StrongCrypt.Encryption,StrongCrypt.Decryption}`; `tests/{StrongCrypt.Protocol.Tests,StrongCrypt.Encryption.Tests,StrongCrypt.Decryption.Tests}`.
+- Build config: `Directory.Build.props` (root/src/tests) + `Directory.Packages.props` central package management. `net10.0`, nullable enabled, implicit usings disabled, `TreatWarningsAsErrors`, .NET analyzers at `latest-Recommended`.
 - Remote push/merge/publish authority: **NOT GRANTED**.
 
 ## Current execution
 
-- Active task: `SC-T00`.
+- Active task: `SC-T01` (threat model and security invariants).
 - Status: `READY`.
-- Next approved action: inspect Git/repository state, then bootstrap only what is missing.
+- Next approved action: Agent 01 authors `docs/THREAT_MODEL.md` mapping V1 security invariants to implementation/test responsibilities, then hand to Agent 03 for mandatory independent review.
 - Continuous execution: **ENABLED**. Do not pause between approved tasks.
 
 ## Durable decisions
@@ -32,11 +35,11 @@
 
 ## Completed tasks
 
-- None.
+- `SC-T00` — Repository bootstrap (Agent 01, MEDIUM risk, no independent review required). Skeleton compiles; package boundaries asserted by tests.
 
 ## Open blockers
 
-- None known before repository inspection.
+- None.
 
 ## Scope changes
 
@@ -44,7 +47,8 @@
 
 ## Last validation
 
-- None; execution has not started.
+- `SC-T00`: `dotnet restore` OK; `dotnet build` succeeded with 0 warnings / 0 errors; `dotnet test` 12/12 passed (Protocol 8, Encryption 2, Decryption 2).
+- Boundary evidence: Encryption and Decryption each reference `StrongCrypt.Protocol` only; neither references the other (asserted at both project-file and compiled-assembly level); all three production projects declare zero NuGet `PackageReference` entries.
 
 ## Resume rule
 

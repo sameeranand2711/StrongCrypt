@@ -1,0 +1,39 @@
+<Project>
+
+  <!--
+    Repository-wide build settings for StrongCrypt V1.
+
+    Applies to every project under the repository root. Project-specific
+    overrides live in src/Directory.Build.props and tests/Directory.Build.props,
+    both of which import this file explicitly.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Explicit usings only: crypto code should show its dependencies. -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- Fail the build on any warning; security code must stay warning-clean. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>9999</WarningLevel>
+
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-Recommended</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+
+    <!-- Reproducible, auditable output. -->
+    <Deterministic>true</Deterministic>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!-- V1 never needs unsafe blocks. -->
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+
+    <!-- No implicit NuGet feed mutation during restore. -->
+    <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
+  </PropertyGroup>
+
+</Project>

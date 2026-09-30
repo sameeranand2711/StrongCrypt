@@ -10,7 +10,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 
 - **Owner:** Agent 01
 - **Risk:** MEDIUM
-- **Status:** READY
+- **Status:** DONE
 - **Dependencies:** none
 - **Objective:** Establish the minimal .NET 10 solution/project/test skeleton and safe Git hygiene without overwriting existing user work.
 - **In scope:** Inspect current repo; initialize Git only if absent; feature branch if appropriate; solution; three production projects; test projects; nullable/analyzers/warnings policy; `.gitignore` additions; package-reference boundary checks.
@@ -22,6 +22,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **WRITE:** solution/project files, `src/**`, `tests/**`, `.gitignore`, scoped build props.
 - **PROTECTED:** unrelated existing application code; remote repository; production/config secrets.
 - **Done checklist:** behavior/output complete; acceptance met; scope respected; build passed; state updated; local commit when safe.
+- **Completion note:** Git initialized (`main` baseline, work on `feature/strongcrypt-v1`); `StrongCrypt.sln` with 3 production + 3 test projects on `net10.0`; central package management with test-only dependencies; `TreatWarningsAsErrors` + .NET analyzers; boundary tests assert Encryption/Decryption reference Protocol only and never each other, and that production projects declare zero NuGet references. `dotnet build` clean (0 warnings), `dotnet test` 12/12 passed.
 
 ---
 
@@ -30,7 +31,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 01
 - **Reviewer:** Agent 03
 - **Risk:** HIGH
-- **Status:** PENDING
+- **Status:** READY
 - **Dependencies:** SC-T00
 - **Objective:** Convert `SPEC.md` security requirements into a compact implementation threat model and testable invariants without expanding V1 scope.
 - **In scope:** attacker capabilities; assets; trust boundaries; misuse cases; nonce/key/AAD risks; hostile payload parsing; error-oracle risks; package capability separation; explicit non-goals.

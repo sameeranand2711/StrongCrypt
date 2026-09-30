@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    StrongCrypt.Protocol — capability-neutral V1 wire-format metadata.
+
+    Contains protocol constants, identifiers and shared validation limits only.
+    It must NOT contain encryption operations, decryption operations, key access
+    implementation, or hostile-input parsing (SPEC.md, hard architecture
+    boundary). It must not reference StrongCrypt.Encryption or
+    StrongCrypt.Decryption.
+  -->
+  <PropertyGroup>
+    <Description>Capability-neutral StrongCrypt V1 protocol constants and metadata. Contains no cryptographic operations.</Description>
+  </PropertyGroup>
+
+</Project>
