@@ -1,16 +1,21 @@
 using System;
-using System.Text;
-using System.Security.Cryptography;
 using System.Buffers.Binary;
+using System.Security.Cryptography;
+using System.Text;
+using Xunit;
 using StrongCrypt.Decryption;
 using StrongCrypt.Protocol;
-using Xunit;
 
 namespace StrongCrypt.Decryption.Tests;
 
 public class AesGcmDecryptorTests
 {
     private static readonly byte[] TestKey = new byte[32];
+
+    static AesGcmDecryptorTests()
+    {
+        RandomNumberGenerator.Fill(TestKey);
+    }
 
     [Fact]
     public void Decrypt_ValidEnvelope_ReturnsPlaintext()
@@ -26,7 +31,7 @@ public class AesGcmDecryptorTests
     [Fact]
     public void Decrypt_WithExternalAAD_ReturnsPlaintext()
     {
-        byte[] plaintext = Encoding.UTF8.GetBytes("authenticated data");
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] externalAAD = Encoding.UTF8.GetBytes("context");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, externalAAD);
 
@@ -38,7 +43,7 @@ public class AesGcmDecryptorTests
     [Fact]
     public void Decrypt_WrongKey_ThrowsCryptographicException()
     {
-        byte[] plaintext = Encoding.UTF8.GetBytes("secret");
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
         byte[] wrongKey = new byte[32];
         wrongKey[0] = 1;
@@ -48,9 +53,9 @@ public class AesGcmDecryptorTests
     }
 
     [Fact]
-    public void Decrypt_ModifiedCiphertext_ThrowsCryptographicException()
+    public void Decrypt_CorruptedTag_ThrowsCryptographicException()
     {
-        byte[] plaintext = Encoding.UTF8.GetBytes("tamper test");
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
 
         envelope[^1] ^= 1;
@@ -60,9 +65,9 @@ public class AesGcmDecryptorTests
     }
 
     [Fact]
-    public void Decrypt_ModifiedTag_ThrowsCryptographicException()
+    public void Decrypt_CorruptedCiphertext_ThrowsCryptographicException()
     {
-        byte[] plaintext = Encoding.UTF8.GetBytes("tag test");
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
 
         envelope[22] ^= 1;
@@ -72,9 +77,9 @@ public class AesGcmDecryptorTests
     }
 
     [Fact]
-    public void Decrypt_ModifiedAAD_ThrowsCryptographicException()
+    public void Decrypt_WrongAAD_ThrowsCryptographicException()
     {
-        byte[] plaintext = Encoding.UTF8.GetBytes("aad test");
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] externalAAD = Encoding.UTF8.GetBytes("original");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, externalAAD);
 
@@ -87,25 +92,18 @@ public class AesGcmDecryptorTests
     [Fact]
     public void Decrypt_InvalidKeyLength_ThrowsArgumentException()
     {
-        byte[] envelope = CreateValidEnvelope(TestKey, new byte[16], Array.Empty<byte>());
+        byte[] plaintext = new byte[16];
+        byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
 
         Assert.Throws<ArgumentException>(() =>
             AesGcmDecryptor.Decrypt(new byte[16], envelope));
     }
 
     [Fact]
-    public void Decrypt_TooShort_ThrowsArgumentException()
+    public void Decrypt_InvalidMagic_ThrowsArgumentException()
     {
-        byte[] tooShort = new byte[33];
-
-        Assert.Throws<ArgumentException>(() =>
-            AesGcmDecryptor.Decrypt(TestKey, tooShort));
-    }
-
-    [Fact]
-    public void Decrypt_WrongMagic_ThrowsArgumentException()
-    {
-        byte[] envelope = CreateValidEnvelope(TestKey, new byte[16], Array.Empty<byte>());
+        byte[] plaintext = new byte[16];
+        byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
         envelope[0] = 0xFF;
 
         Assert.Throws<ArgumentException>(() =>
@@ -113,93 +111,103 @@ public class AesGcmDecryptorTests
     }
 
     [Fact]
-    public void Decrypt_WrongVersion_ThrowsArgumentException()
+    public void Decrypt_InvalidVersion_ThrowsArgumentException()
     {
-        byte[] envelope = CreateValidEnvelope(TestKey, new byte[16], Array.Empty<byte>());
-        envelope[4] = 2;
+        byte[] plaintext = new byte[16];
+        byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
+        envelope[2] = 99;
 
         Assert.Throws<ArgumentException>(() =>
             AesGcmDecryptor.Decrypt(TestKey, envelope));
     }
 
     [Fact]
+    public void Decrypt_InvalidProfile_ThrowsArgumentException()
+    {
+        byte[] plaintext = new byte[16];
+        byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
+        envelope[3] = 99;
+
+        Assert.Throws<ArgumentException>(() =>
+            AesGcmDecryptor.Decrypt(TestKey, envelope));
+    }
+
+    [Fact]
+    public void Decrypt_TooShort_ThrowsArgumentException()
+    {
+        byte[] tooShort = new byte[37];
+
+        Assert.Throws<ArgumentException>(() =>
+            AesGcmDecryptor.Decrypt(TestKey, tooShort));
+    }
+
+    [Fact]
     public void TryDecrypt_ValidEnvelope_ReturnsTrue()
     {
-        byte[] plaintext = Encoding.UTF8.GetBytes("try decrypt test");
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
-        Span<byte> destination = new byte[plaintext.Length];
+        byte[] destination = new byte[plaintext.Length];
 
-        bool success = AesGcmDecryptor.TryDecrypt(TestKey, envelope, destination, out int bytesWritten);
+        bool result = AesGcmDecryptor.TryDecrypt(TestKey, envelope, destination, out int bytesWritten);
 
-        Assert.True(success);
+        Assert.True(result);
         Assert.Equal(plaintext.Length, bytesWritten);
-        Assert.True(plaintext.AsSpan().SequenceEqual(destination));
+        Assert.Equal(plaintext, destination);
     }
 
     [Fact]
     public void TryDecrypt_DestinationTooSmall_ReturnsFalse()
     {
-        byte[] plaintext = new byte[100];
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
-        Span<byte> destination = new byte[50];
+        byte[] destination = new byte[plaintext.Length - 1];
 
-        bool success = AesGcmDecryptor.TryDecrypt(TestKey, envelope, destination, out int bytesWritten);
+        bool result = AesGcmDecryptor.TryDecrypt(TestKey, envelope, destination, out int bytesWritten);
 
-        Assert.False(success);
+        Assert.False(result);
         Assert.Equal(0, bytesWritten);
     }
 
     [Fact]
-    public void TryDecrypt_InvalidKey_ReturnsFalse()
+    public void TryDecrypt_WrongKey_ReturnsFalse()
     {
-        byte[] envelope = CreateValidEnvelope(TestKey, new byte[16], Array.Empty<byte>());
-        Span<byte> destination = new byte[16];
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
+        byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
+        byte[] wrongKey = new byte[32];
+        wrongKey[0] = 1;
+        byte[] destination = new byte[plaintext.Length];
 
-        bool success = AesGcmDecryptor.TryDecrypt(new byte[16], envelope, destination, out int bytesWritten);
+        bool result = AesGcmDecryptor.TryDecrypt(wrongKey, envelope, destination, out int bytesWritten);
 
-        Assert.False(success);
+        Assert.False(result);
         Assert.Equal(0, bytesWritten);
     }
 
     [Fact]
-    public void TryDecrypt_AuthenticationFails_ReturnsFalse()
+    public void GetPlaintextSize_ValidEnvelope_ReturnsCorrectSize()
     {
-        byte[] plaintext = new byte[32];
+        byte[] plaintext = Encoding.UTF8.GetBytes("test message");
         byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
-        envelope[^1] ^= 1;
-        Span<byte> destination = new byte[plaintext.Length];
 
-        bool success = AesGcmDecryptor.TryDecrypt(TestKey, envelope, destination, out int bytesWritten);
+        int size = AesGcmDecryptor.GetPlaintextSize(envelope);
 
-        Assert.False(success);
-        Assert.Equal(0, bytesWritten);
+        Assert.Equal(plaintext.Length, size);
     }
 
     [Fact]
-    public void GetPlaintextLength_ValidEnvelope_ReturnsCorrectLength()
-    {
-        byte[] plaintext = new byte[123];
-        byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
-
-        int length = AesGcmDecryptor.GetPlaintextLength(envelope);
-
-        Assert.Equal(123, length);
-    }
-
-    [Fact]
-    public void GetPlaintextLength_InvalidEnvelope_ThrowsArgumentException()
+    public void GetPlaintextSize_InvalidEnvelope_ThrowsArgumentException()
     {
         byte[] invalid = new byte[10];
 
         Assert.Throws<ArgumentException>(() =>
-            AesGcmDecryptor.GetPlaintextLength(invalid));
+            AesGcmDecryptor.GetPlaintextSize(invalid));
     }
 
     [Fact]
     public void Decrypt_EmptyPlaintext_Succeeds()
     {
-        byte[] empty = Array.Empty<byte>();
-        byte[] envelope = CreateValidEnvelope(TestKey, empty, Array.Empty<byte>());
+        byte[] plaintext = Array.Empty<byte>();
+        byte[] envelope = CreateValidEnvelope(TestKey, plaintext, Array.Empty<byte>());
 
         byte[] decrypted = AesGcmDecryptor.Decrypt(TestKey, envelope);
 
@@ -209,12 +217,14 @@ public class AesGcmDecryptorTests
     private static byte[] CreateValidEnvelope(byte[] key, byte[] plaintext, byte[] externalAAD)
     {
         byte[] keyId = Array.Empty<byte>();
-        // magic(2) + version(1) + profile(1) + flags(1) + keyIdLen(1) + keyId(0) + nonce(12) + ciphertextLen(4) + ciphertext(N) + tag(16)
-        int envelopeSize = 2 + 1 + 1 + 1 + 1 + keyId.Length + 12 + 4 + plaintext.Length + 16;
+        int keyIdLen = keyId.Length;
+
+        // magic(2) + version(1) + profile(1) + flags(1) + keyIdLen(1) + keyId(N) + nonce(12) + ciphertextLen(4) + ciphertext(M) + tag(16)
+        int envelopeSize = 2 + 1 + 1 + 1 + 1 + keyIdLen + 12 + 4 + plaintext.Length + 16;
         byte[] envelope = new byte[envelopeSize];
-        
+
         int pos = 0;
-        
+
         // Magic (little-endian 0x5343)
         envelope[pos++] = 0x43;
         envelope[pos++] = 0x53;
@@ -225,39 +235,47 @@ public class AesGcmDecryptorTests
         // Flags
         envelope[pos++] = 0;
         // KeyIdLen
-        envelope[pos++] = (byte)keyId.Length;
-        
-        int headerEnd = pos + keyId.Length;
-        if (keyId.Length > 0)
+        envelope[pos++] = (byte)keyIdLen;
+
+        // KeyId (if any)
+        if (keyIdLen > 0)
+        {
             keyId.CopyTo(envelope, pos);
-        pos = headerEnd;
-        
+        }
+        pos += keyIdLen;
+
+        // Nonce
         byte[] nonce = new byte[12];
         RandomNumberGenerator.Fill(nonce);
         nonce.CopyTo(envelope, pos);
         pos += 12;
-        
+
         // CiphertextLen
         BinaryPrimitives.WriteInt32LittleEndian(envelope.AsSpan(pos, 4), plaintext.Length);
         pos += 4;
-        
+
+        // Protocol header ends here: 22 + keyIdLen
+        int headerEnd = 22 + keyIdLen;
+
         Span<byte> ciphertextSpan = envelope.AsSpan(pos, plaintext.Length);
         pos += plaintext.Length;
-        
+
         Span<byte> tagSpan = envelope.AsSpan(pos, 16);
-        
+
+        // Construct AAD: protocolHeader || externalAAD
         ReadOnlySpan<byte> protocolHeader = envelope.AsSpan(0, headerEnd);
-        Span<byte> aad = externalAAD.Length == 0 
-            ? protocolHeader.ToArray() 
+        Span<byte> aad = externalAAD.Length == 0
+            ? protocolHeader.ToArray()
             : CombineAAD(protocolHeader, externalAAD);
-        
+
         using (var aes = new AesGcm(key, V1Constants.TagSize))
         {
             aes.Encrypt(nonce, plaintext, ciphertextSpan, tagSpan, aad);
         }
-        
+
         return envelope;
     }
+
     private static byte[] CombineAAD(ReadOnlySpan<byte> header, byte[] external)
     {
         byte[] combined = new byte[header.Length + external.Length];

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Cross-package interoperability tests. Verifies that Encryption-produced
+    envelopes decrypt correctly without implementation coupling. This is the
+    only test project that references both Encryption and Decryption packages.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\StrongCrypt.Encryption\StrongCrypt.Encryption.csproj" />
+    <ProjectReference Include="..\..\src\StrongCrypt.Decryption\StrongCrypt.Decryption.csproj" />
+  </ItemGroup>
+
+</Project>

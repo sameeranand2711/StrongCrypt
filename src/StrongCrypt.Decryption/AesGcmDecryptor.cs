@@ -6,8 +6,7 @@ using StrongCrypt.Protocol;
 namespace StrongCrypt.Decryption;
 
 /// <summary>
-/// StrongCrypt V1 decryptor using AES-256-GCM.
-/// Parses and authenticates V1 envelopes, then decrypts payload.
+/// Provides methods for decrypting StrongCrypt V1 envelopes using AES-256-GCM.
 /// </summary>
 public static class AesGcmDecryptor
 {
@@ -15,18 +14,18 @@ public static class AesGcmDecryptor
     /// Decrypts a V1 envelope and returns plaintext as a new byte array.
     /// </summary>
     /// <param name="key">32-byte AES-256 key.</param>
-    /// <param name="envelope">Complete V1 envelope bytes.</param>
-    /// <param name="externalAAD">Optional external AAD (concatenated after protocol header in GCM AAD).</param>
-    /// <returns>Plaintext bytes.</returns>
-    /// <exception cref="ArgumentException">Invalid key size or envelope format.</exception>
-    /// <exception cref="CryptographicException">Authentication or decryption failure.</exception>
+    /// <param name="envelope">V1 envelope bytes.</param>
+    /// <param name="externalAAD">Optional external AAD (must match encryption).</param>
+    /// <returns>Decrypted plaintext.</returns>
+    /// <exception cref="ArgumentException">Invalid envelope format.</exception>
+    /// <exception cref="CryptographicException">Authentication or decryption failed.</exception>
     public static byte[] Decrypt(
         ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> envelope,
         ReadOnlySpan<byte> externalAAD = default)
     {
         if (key.Length != 32)
-            throw new ArgumentException("Key must be 32 bytes", nameof(key));
+            throw new ArgumentException("Key must be exactly 32 bytes", nameof(key));
 
         var parsed = ParseEnvelope(envelope);
         
@@ -51,14 +50,14 @@ public static class AesGcmDecryptor
     }
 
     /// <summary>
-    /// Attempts to decrypt a V1 envelope into caller-provided destination buffer.
+    /// Attempts to decrypt a V1 envelope into a caller-provided buffer.
     /// </summary>
     /// <param name="key">32-byte AES-256 key.</param>
-    /// <param name="envelope">Complete V1 envelope bytes.</param>
-    /// <param name="destination">Destination buffer (must be >= plaintext length).</param>
-    /// <param name="bytesWritten">Actual plaintext bytes written.</param>
+    /// <param name="envelope">V1 envelope bytes.</param>
+    /// <param name="destination">Buffer for plaintext output.</param>
+    /// <param name="bytesWritten">Plaintext length on success.</param>
     /// <param name="externalAAD">Optional external AAD.</param>
-    /// <returns>True if successful; false if destination too small or decryption fails.</returns>
+    /// <returns>True if decryption succeeded; false otherwise.</returns>
     public static bool TryDecrypt(
         ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> envelope,
@@ -67,7 +66,7 @@ public static class AesGcmDecryptor
         ReadOnlySpan<byte> externalAAD = default)
     {
         bytesWritten = 0;
-        
+
         if (key.Length != 32)
             return false;
 
@@ -98,31 +97,15 @@ public static class AesGcmDecryptor
     }
 
     /// <summary>
-    /// Calculates the plaintext length from a V1 envelope without decrypting.
+    /// Returns the plaintext size for a given envelope without decrypting.
     /// </summary>
-    /// <param name="envelope">Complete V1 envelope bytes.</param>
+    /// <param name="envelope">V1 envelope bytes.</param>
     /// <returns>Plaintext length in bytes.</returns>
     /// <exception cref="ArgumentException">Invalid envelope format.</exception>
-    public static int GetPlaintextLength(ReadOnlySpan<byte> envelope)
+    public static int GetPlaintextSize(ReadOnlySpan<byte> envelope)
     {
         var parsed = ParseEnvelope(envelope);
         return parsed.Ciphertext.Length;
-    }
-
-    private readonly ref struct ParsedEnvelope
-    {
-        public ReadOnlySpan<byte> ProtocolHeader { get; }
-        public ReadOnlySpan<byte> Nonce { get; }
-        public ReadOnlySpan<byte> Tag { get; }
-        public ReadOnlySpan<byte> Ciphertext { get; }
-
-        public ParsedEnvelope(ReadOnlySpan<byte> protocolHeader, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> tag, ReadOnlySpan<byte> ciphertext)
-        {
-            ProtocolHeader = protocolHeader;
-            Nonce = nonce;
-            Tag = tag;
-            Ciphertext = ciphertext;
-        }
     }
 
     private static ParsedEnvelope ParseEnvelope(ReadOnlySpan<byte> envelope)
@@ -172,12 +155,13 @@ public static class AesGcmDecryptor
         if (envelope.Length != expectedLength)
             return false;
 
-        int headerEnd = 6 + keyIdLen;
-        int nonceOffset = headerEnd;
+        // Protocol header = [0, 22+keyIdLen) per spec
+        int protocolHeaderLen = 22 + keyIdLen;
+        int nonceOffset = 6 + keyIdLen;
         int ciphertextOffset = 22 + keyIdLen;
         int tagOffset = ciphertextOffset + ciphertextLen;
 
-        ReadOnlySpan<byte> protocolHeader = envelope.Slice(0, headerEnd);
+        ReadOnlySpan<byte> protocolHeader = envelope.Slice(0, protocolHeaderLen);
         ReadOnlySpan<byte> nonce = envelope.Slice(nonceOffset, V1Constants.NonceSize);
         ReadOnlySpan<byte> tag = envelope.Slice(tagOffset, V1Constants.TagSize);
         ReadOnlySpan<byte> ciphertext = envelope.Slice(ciphertextOffset, ciphertextLen);
@@ -195,5 +179,25 @@ public static class AesGcmDecryptor
         protocolHeader.CopyTo(combinedAAD);
         externalAAD.CopyTo(combinedAAD.Slice(protocolHeader.Length));
         return combinedAAD;
+    }
+
+    private readonly ref struct ParsedEnvelope
+    {
+        public ReadOnlySpan<byte> ProtocolHeader { get; }
+        public ReadOnlySpan<byte> Nonce { get; }
+        public ReadOnlySpan<byte> Tag { get; }
+        public ReadOnlySpan<byte> Ciphertext { get; }
+
+        public ParsedEnvelope(
+            ReadOnlySpan<byte> protocolHeader,
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> tag,
+            ReadOnlySpan<byte> ciphertext)
+        {
+            ProtocolHeader = protocolHeader;
+            Nonce = nonce;
+            Tag = tag;
+            Ciphertext = ciphertext;
+        }
     }
 }
