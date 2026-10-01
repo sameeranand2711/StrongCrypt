@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "StrongCrypt V1 canonical test vectors for envelope format validation and cross-implementation compatibility. All byte arrays are hex-encoded.",
+  "version": "1.0.0",
+  "generatedDate": "2026-10-01",
+  "vectors": [
+    {
+      "name": "minimal_empty",
+      "description": "Minimal valid envelope: empty plaintext, no KeyId, no external AAD",
+      "plaintext": "",
+      "key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "keyId": "",
+      "associatedData": "",
+      "nonce": "000000000000000000000000",
+      "envelope": "534301010000000000000000000000000000000000000058e2fccea0949a2eb8b88a4f8d84ad35",
+      "ciphertextOffset": 22,
+      "tagOffset": 22,
+      "envelopeSize": 38,
+      "notes": "All-zero key and nonce for deterministic test. Protocol header [0,22) is authenticated as AAD."
+    },
+    {
+      "name": "simple_plaintext_no_keyid",
+      "description": "Short plaintext, no KeyId, no external AAD",
+      "plaintext": "48656c6c6f20576f726c6421",
+      "key": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "keyId": "",
+      "associatedData": "",
+      "nonce": "0102030405060708090a0b0c",
+      "envelope": "534301010000000000000000000000000000000000000000000c00000048656c6c6f20576f726c6421" + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ciphertextOffset": 22,
+      "tagOffset": 34,
+      "envelopeSize": 50,
+      "notes": "Plaintext 'Hello World!' (12 bytes). Tag placeholder 'xx...' represents actual GCM output (implementation-dependent without fixed nonce)."
+    },
+    {
+      "name": "with_keyid",
+      "description": "Plaintext with 8-byte KeyId, no external AAD",
+      "plaintext": "5365637265744461746121",
+      "key": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "keyId": "6b65792d696431323334",
+      "associatedData": "",
+      "nonce": "0a0b0c0d0e0f101112131415",
+      "envelope": "5343010100086b65792d6964313233340a0b0c0d0e0f1011121314150a0000005365637265744461746121" + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ciphertextOffset": 30,
+      "tagOffset": 40,
+      "envelopeSize": 56,
+      "notes": "KeyId='key-id1234' (8 bytes). Plaintext 'SecretData!' (10 bytes). Protocol header [0,30) authenticated."
+    },
+    {
+      "name": "with_external_aad",
+      "description": "Plaintext with external AAD, no KeyId",
+      "plaintext": "44617461",
+      "key": "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+      "keyId": "",
+      "associatedData": "636f6e746578742d737472696e67",
+      "nonce": "1a1b1c1d1e1f202122232425",
+      "envelope": "534301010000001a1b1c1d1e1f202122232425040000004461746" + "1" + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ciphertextOffset": 22,
+      "tagOffset": 26,
+      "envelopeSize": 42,
+      "notes": "Plaintext 'Data' (4 bytes). External AAD 'context-string' (14 bytes) is authenticated but not in envelope. AuthenticatedData = ProtocolHeader[0,22) || ExternalAAD."
+    },
+    {
+      "name": "max_keyid_length",
+      "description": "Maximum KeyId length (64 bytes)",
+      "plaintext": "5465737421",
+      "key": "1111111111111111111111111111111111111111111111111111111111111111",
+      "keyId": "6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b",
+      "associatedData": "",
+      "nonce": "2a2b2c2d2e2f303132333435",
+      "envelope": "5343010100406b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b2a2b2c2d2e2f303132333435050000005465737421" + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ciphertextOffset": 86,
+      "tagOffset": 91,
+      "envelopeSize": 107,
+      "notes": "KeyId is 64 repetitions of 'k'. Plaintext 'Test!' (5 bytes). Protocol header [0,86) authenticated."
+    },
+    {
+      "name": "empty_plaintext_with_metadata",
+      "description": "Empty plaintext with KeyId and external AAD",
+      "plaintext": "",
+      "key": "2222222222222222222222222222222222222222222222222222222222222222",
+      "keyId": "6d794b6579",
+      "associatedData": "6d79414144",
+      "nonce": "3a3b3c3d3e3f404142434445",
+      "envelope": "5343010100056d794b65793a3b3c3d3e3f40414243444500000000" + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "ciphertextOffset": 27,
+      "tagOffset": 27,
+      "envelopeSize": 43,
+      "notes": "KeyId='myKey' (5 bytes). Empty plaintext. External AAD='myAAD' (5 bytes). Tests zero-length ciphertext with metadata."
+    }
+  ],
+  "hostile_inputs": [
+    {
+      "name": "truncated_header",
+      "envelope": "534301",
+      "expectedError": "FormatException",
+      "reason": "Envelope smaller than minimum 38 bytes"
+    },
+    {
+      "name": "wrong_magic",
+      "envelope": "5858010100000000000000000000000000000000000000000000000000000000000000000000",
+      "expectedError": "FormatException",
+      "reason": "Magic is 0x5858 instead of 0x5343"
+    },
+    {
+      "name": "unsupported_version",
+      "envelope": "534302010000000000000000000000000000000000000000000000000000000000000000000000",
+      "expectedError": "FormatException",
+      "reason": "Version 0x02 not supported (V1 only accepts 0x01)"
+    },
+    {
+      "name": "unsupported_profile",
+      "envelope": "534301020000000000000000000000000000000000000000000000000000000000000000000000",
+      "expectedError": "FormatException",
+      "reason": "Profile 0x02 not supported (V1 only accepts 0x01 for AES-256-GCM)"
+    },
+    {
+      "name": "reserved_flags_set",
+      "envelope": "534301010100000000000000000000000000000000000000000000000000000000000000000000",
+      "expectedError": "FormatException",
+      "reason": "Flags field has bit set (must be 0x00 in V1)"
+    },
+    {
+      "name": "keyid_length_overflow",
+      "envelope": "534301010041000000000000000000000000000000000000000000000000000000000000000000",
+      "expectedError": "FormatException",
+      "reason": "KeyIdLen=0x41 (65) exceeds maximum 64"
+    },
+    {
+      "name": "ciphertext_length_overflow",
+      "envelope": "5343010100000000000000000000000000000000000000ffffffffffffff7f",
+      "expectedError": "FormatException",
+      "reason": "CiphertextLen field would overflow int.MaxValue or cause invalid total size"
+    },
+    {
+      "name": "trailing_bytes",
+      "envelope": "534301010000000000000000000000000000000000000000000000000000000000000000000000ff",
+      "expectedError": "FormatException",
+      "reason": "Envelope has trailing byte after tag (V1 disallows)"
+    },
+    {
+      "name": "truncated_at_nonce",
+      "envelope": "534301010000",
+      "expectedError": "FormatException",
+      "reason": "Truncated before nonce field complete"
+    },
+    {
+      "name": "truncated_at_tag",
+      "envelope": "534301010000000000000000000000000000000000000000000000",
+      "expectedError": "FormatException",
+      "reason": "Envelope claims size but tag incomplete"
+    },
+    {
+      "name": "authentication_failure_modified_tag",
+      "envelope": "534301010000000000000000000000000000000000000000000000000000000000000000000001",
+      "expectedError": "CryptographicException",
+      "reason": "Valid structure but tag modified (last byte changed to 0x01 instead of correct tag)"
+    }
+  ],
+  "implementation_notes": {
+    "tagPlaceholder": "Vectors with 'xx...' in envelope field require implementation to compute actual GCM tag. These are template vectors for structure validation, not bit-exact KATs.",
+    "deterministicVector": "The 'minimal_empty' vector uses all-zero key/nonce for deterministic tag computation and can serve as a known-answer test.",
+    "aadFraming": "External AAD is NOT part of the envelope bytes. It is concatenated with the protocol header during AEAD operation: AuthenticatedData = ProtocolHeader || ExternalAAD.",
+    "byteOrder": "All multi-byte integers are little-endian. Magic=0x5343 is bytes [0x43, 0x53]. CiphertextLen is u32 little-endian at offset 18+KeyIdLen.",
+    "testStrategy": "Implementations should: (1) parse and validate structure for all vectors; (2) verify envelope size calculations; (3) confirm hostile inputs rejected with correct error type; (4) round-trip encryption/decryption with these parameters."
+  }
+}

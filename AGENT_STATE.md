@@ -11,9 +11,9 @@
 
 ## Current execution
 
-- Active task: `SC-T02` (envelope format specification and authentication contract).
-- Status: `READY`.
-- Next approved action: Agent 01 authors `docs/ENVELOPE_FORMAT.md` with canonical byte layout, authenticated region, AAD framing, limits, and error taxonomy, then hands to Agent 03 for independent review.
+- Active task: `SC-T03` (implementation: StrongCrypt.Protocol, StrongCrypt.Encryption).
+- Status: READY.
+- Agent 01 complete: `docs/PROTOCOL_V1.md` (wire format, AAD framing, parsing rules, public API contracts, buffer sizing, security considerations) and `tests/fixtures/v1-test-vectors.json` (6 canonical vectors + 11 hostile-input cases). Ready for Agent 03 independent review.
 - Continuous execution: **ENABLED**. Do not pause between approved tasks.
 
 ## Durable decisions

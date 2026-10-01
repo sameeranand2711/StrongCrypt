@@ -53,7 +53,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 01
 - **Reviewer:** Agent 03
 - **Risk:** HIGH
-- **Status:** PENDING
+- **Status:** COMPLETE
 - **Dependencies:** SC-T01
 - **Objective:** Define the exact canonical V1 binary envelope and minimal public API shapes before implementation.
 - **In scope:** byte layout; byte order; field widths; key-id limits; flags; length rules; authenticated-header framing; external AAD framing; format/authentication error taxonomy; encryption API; decryption API; buffer-sizing contract; compatibility fixture strategy.
