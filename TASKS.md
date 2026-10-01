@@ -30,8 +30,8 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 
 - **Owner:** Agent 01
 - **Reviewer:** Agent 03
-- **Risk:** HIGH
-- **Status:** READY
+- **Risk:** MEDIUM
+- **Status:** DONE
 - **Dependencies:** SC-T00
 - **Objective:** Convert `SPEC.md` security requirements into a compact implementation threat model and testable invariants without expanding V1 scope.
 - **In scope:** attacker capabilities; assets; trust boundaries; misuse cases; nonce/key/AAD risks; hostile payload parsing; error-oracle risks; package capability separation; explicit non-goals.
@@ -44,6 +44,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **PROTECTED:** `SPEC.md` cryptographic contract unless human approves change.
 - **Review gate:** Agent 03 independent targeted review required.
 - **Done checklist:** output complete; review passed; any findings remediated once and verified; state/commit updated.
+- **Completion:** 2026-10-01. All ten invariants mapped; explicit-tag-size/zeroization/key-abstraction requirements integrated; Agent 03 review passed after one remediation cycle.
 
 ---
 

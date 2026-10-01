@@ -11,9 +11,9 @@
 
 ## Current execution
 
-- Active task: `SC-T01` (threat model and security invariants).
+- Active task: `SC-T02` (envelope format specification and authentication contract).
 - Status: `READY`.
-- Next approved action: Agent 01 authors `docs/THREAT_MODEL.md` mapping V1 security invariants to implementation/test responsibilities, then hand to Agent 03 for mandatory independent review.
+- Next approved action: Agent 01 authors `docs/ENVELOPE_FORMAT.md` with canonical byte layout, authenticated region, AAD framing, limits, and error taxonomy, then hands to Agent 03 for independent review.
 - Continuous execution: **ENABLED**. Do not pause between approved tasks.
 
 ## Durable decisions
