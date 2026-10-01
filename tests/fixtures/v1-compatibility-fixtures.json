@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "StrongCrypt V1 canonical compatibility test vectors. These fixtures use deterministic keys/nonces for reproducibility. DO NOT use these keys in production.",
+  "version": "1.0.0",
+  "format": "All byte arrays are hex-encoded. Envelopes are complete wire-format payloads.",
+  "fixtures": [
+    {
+      "name": "minimal",
+      "description": "Minimal valid V1 envelope: empty plaintext, no keyId, no external AAD",
+      "key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "plaintext": "",
+      "keyId": "",
+      "externalAAD": "",
+      "nonce": "000000000000000000000000",
+      "envelope": "43530101000000000000000000000000000000000000dab3a89f6035e7d1a50b71b7d5188afc",
+      "note": "Tests minimum viable encryption/decryption path"
+    },
+    {
+      "name": "basic",
+      "description": "Basic V1 envelope: short plaintext, no keyId, no external AAD",
+      "key": "0101010101010101010101010101010101010101010101010101010101010101",
+      "plaintext": "68656c6c6f",
+      "keyId": "",
+      "externalAAD": "",
+      "nonce": "010101010101010101010101",
+      "envelope": "43530101000001010101010101010101010105000000da1cd6f6066a9fcd0694bff18695063c9291580cc0",
+      "note": "plaintext = 'hello' in UTF-8"
+    },
+    {
+      "name": "with_keyid",
+      "description": "V1 envelope with keyId",
+      "key": "0202020202020202020202020202020202020202020202020202020202020202",
+      "plaintext": "64617461",
+      "keyId": "6b65792d303031",
+      "externalAAD": "",
+      "nonce": "020202020202020202020202",
+      "envelope": "4353010100076b65792d303031020202020202020202020202040000000ca51ae42b33939aa128d625541173077e266d2d",
+      "note": "plaintext = 'data'; keyId = 'key-001'"
+    },
+    {
+      "name": "with_aad",
+      "description": "V1 envelope with external AAD",
+      "key": "0303030303030303030303030303030303030303030303030303030303030303",
+      "plaintext": "736563726574",
+      "keyId": "",
+      "externalAAD": "757365723a616c696365",
+      "nonce": "030303030303030303030303",
+      "envelope": "4353010100000303030303030303030303030600000086532cba92f37f51720f01d1034dd6a310e49a1c63e5",
+      "note": "plaintext = 'secret'; externalAAD = 'user:alice'"
+    },
+    {
+      "name": "full",
+      "description": "V1 envelope with all optional fields",
+      "key": "0404040404040404040404040404040404040404040404040404040404040404",
+      "plaintext": "66756c6c2074657374",
+      "keyId": "70726f642d6b65792d313233",
+      "externalAAD": "74656e616e743a61636d65",
+      "nonce": "040404040404040404040404",
+      "envelope": "43530101000c70726f642d6b65792d31323304040404040404040404040409000000597be592c0ff6ddc3bfb1dc802e85c361c3a6acd2969dedd42",
+      "note": "plaintext = 'full test'; keyId = 'prod-key-123'; externalAAD = 'tenant:acme'"
+    }
+  ]
+}
