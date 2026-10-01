@@ -11,9 +11,9 @@
 
 ## Current execution
 
-- Active task: `SC-T03` (implementation: StrongCrypt.Protocol, StrongCrypt.Encryption).
+- Active task: `SC-T04` (implementation: StrongCrypt.Decryption).
 - Status: READY.
-- Agent 01 complete: `docs/PROTOCOL_V1.md` (wire format, AAD framing, parsing rules, public API contracts, buffer sizing, security considerations) and `tests/fixtures/v1-test-vectors.json` (6 canonical vectors + 11 hostile-input cases). Ready for Agent 03 independent review.
+- Agent 01 complete: SC-T03 encryption implementation and tests (17/17 passed). Checkpoint commit `de2e6fa` created.
 - Continuous execution: **ENABLED**. Do not pause between approved tasks.
 
 ## Durable decisions
