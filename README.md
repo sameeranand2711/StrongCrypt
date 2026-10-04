@@ -2,6 +2,8 @@
 
 **Opinionated, boundary-enforced AES-256-GCM encryption for .NET 10+**
 
+Version: **1.0.0-rc**
+
 StrongCrypt provides physically separated encryption and decryption packages with a frozen wire format. Designed for scenarios where you want strong cryptographic boundaries, deterministic envelope format, and no accidental capability leakage.
 
 ## Packages
@@ -21,6 +23,19 @@ StrongCrypt provides physically separated encryption and decryption packages wit
 - **AAD:** Protocol header + optional external AAD
 
 ## Quick Start
+
+### Installation
+
+```bash
+# For services that only encrypt
+dotnet add package StrongCrypt.Encryption
+
+# For services that only decrypt
+dotnet add package StrongCrypt.Decryption
+
+# For shared protocol constants (usually not needed directly)
+dotnet add package StrongCrypt.Protocol
+```
 
 ### Encryption
 
@@ -82,6 +97,114 @@ catch (ArgumentException)
     // Invalid envelope format: truncated, corrupted, or hostile input
 }
 ```
+
+## Dependency Injection
+
+StrongCrypt provides optional DI extensions for `Microsoft.Extensions.DependencyInjection`.
+
+### Encryption with DI
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using StrongCrypt.Encryption;
+
+// 1. Implement a key provider
+public class MyEncryptionKeyProvider : IEncryptionKeyProvider
+{
+    private readonly IKeyVaultClient _keyVault;
+
+    public MyEncryptionKeyProvider(IKeyVaultClient keyVault)
+    {
+        _keyVault = keyVault;
+    }
+
+    public byte[] GetKey(ReadOnlySpan<byte> keyId)
+    {
+        // Retrieve key from secure storage based on keyId
+        string keyIdString = Encoding.UTF8.GetString(keyId);
+        return _keyVault.GetKey(keyIdString);
+    }
+}
+
+// 2. Register services
+services.AddStrongCryptEncryption<MyEncryptionKeyProvider>();
+
+// 3. Inject and use
+public class MyService
+{
+    private readonly EncryptionService _encryption;
+
+    public MyService(EncryptionService encryption)
+    {
+        _encryption = encryption;
+    }
+
+    public byte[] EncryptData(byte[] plaintext, string keyVersion)
+    {
+        byte[] keyId = Encoding.UTF8.GetBytes(keyVersion);
+        return _encryption.Encrypt(plaintext, keyId);
+    }
+}
+```
+
+### Decryption with DI
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using StrongCrypt.Decryption;
+
+// 1. Implement a key provider
+public class MyDecryptionKeyProvider : IDecryptionKeyProvider
+{
+    private readonly IKeyVaultClient _keyVault;
+
+    public MyDecryptionKeyProvider(IKeyVaultClient keyVault)
+    {
+        _keyVault = keyVault;
+    }
+
+    public byte[] GetKey(ReadOnlySpan<byte> keyId)
+    {
+        // Retrieve key from secure storage based on keyId
+        string keyIdString = Encoding.UTF8.GetString(keyId);
+        return _keyVault.GetKey(keyIdString);
+    }
+}
+
+// 2. Register services
+services.AddStrongCryptDecryption<MyDecryptionKeyProvider>();
+
+// 3. Inject and use
+public class MyService
+{
+    private readonly DecryptionService _decryption;
+
+    public MyService(DecryptionService decryption)
+    {
+        _decryption = decryption;
+    }
+
+    public byte[] DecryptData(byte[] envelope)
+    {
+        // keyId is automatically extracted from envelope
+        return _decryption.Decrypt(envelope);
+    }
+}
+```
+
+### Alternative: Manual Key Provider Registration
+
+```csharp
+// Register key provider separately, then add service
+services.AddSingleton<IEncryptionKeyProvider, MyEncryptionKeyProvider>();
+services.AddStrongCryptEncryption();
+
+// Or for decryption
+services.AddSingleton<IDecryptionKeyProvider, MyDecryptionKeyProvider>();
+services.AddStrongCryptDecryption();
+```
+
+**Important:** The DI integration automatically handles key zeroing. Keys retrieved from `IEncryptionKeyProvider` or `IDecryptionKeyProvider` are zeroed via `CryptographicOperations.ZeroMemory` after use.
 
 ## Zero-Copy APIs
 
