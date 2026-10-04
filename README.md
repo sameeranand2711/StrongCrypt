@@ -142,6 +142,7 @@ public class MyService
     public byte[] EncryptData(byte[] plaintext, string keyVersion)
     {
         byte[] keyId = Encoding.UTF8.GetBytes(keyVersion);
+        // keyId is passed as the second parameter
         return _encryption.Encrypt(plaintext, keyId);
     }
 }
@@ -380,5 +381,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Support
 
-[Add support information here]
->>>>>>> 918b0b9 (feat: StrongCrypt V1 - AES-256-GCM encryption with capability separation)
+For issues and questions, please use the [GitHub issue tracker](https://github.com/sameeranand2711/StrongCrypt/issues).
