@@ -25,8 +25,13 @@ public class AdversarialTests
         span[3] = V1Constants.ProfileAes256Gcm;
         span[4] = V1Constants.ReservedFlags;
         span[5] = (byte)keyIdLen;
+
+        // KeyId before nonce
         if (keyIdLen > 0) keyId.CopyTo(span.Slice(6, keyIdLen));
+
+        // Nonce after keyId
         nonce.CopyTo(span.Slice(6 + keyIdLen, 12));
+
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(span.Slice(18 + keyIdLen, 4), plaintext.Length);
 
         Span<byte> ciphertext = span.Slice(protocolHeaderLen, plaintext.Length);
@@ -260,7 +265,7 @@ public class AdversarialTests
     }
 
 
-    private static byte[] CreateValidEnvelope(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, ReadOnlySpan<byte> keyId = default)
+    private static byte[] CreateValidEnvelope(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, ReadOnlySpan<byte> keyId = default, ReadOnlySpan<byte> externalAAD = default)
     {
         if (key.Length != 32) throw new ArgumentException("Key must be 32 bytes");
 
@@ -278,23 +283,115 @@ public class AdversarialTests
         span[4] = V1Constants.ReservedFlags;
         span[5] = (byte)keyIdLen;
 
+        // KeyId comes before nonce
+        if (keyIdLen > 0)
+            keyId.CopyTo(span.Slice(6, keyIdLen));
+
+        // Nonce after keyId
         byte[] nonce = new byte[12];
         RandomNumberGenerator.Fill(nonce);
-        nonce.CopyTo(span.Slice(6, 12));
-
-        if (keyIdLen > 0)
-            keyId.CopyTo(span.Slice(18, keyIdLen));
+        nonce.CopyTo(span.Slice(6 + keyIdLen, 12));
 
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(span.Slice(18 + keyIdLen, 4), ciphertextLen);
 
         Span<byte> ciphertext = span.Slice(protocolHeaderLen, ciphertextLen);
         Span<byte> tag = span.Slice(protocolHeaderLen + ciphertextLen, 16);
 
-        Span<byte> aad = span.Slice(0, protocolHeaderLen);
+        Span<byte> aad = stackalloc byte[protocolHeaderLen + externalAAD.Length];
+        span.Slice(0, protocolHeaderLen).CopyTo(aad);
+        if (!externalAAD.IsEmpty)
+        {
+            externalAAD.CopyTo(aad.Slice(protocolHeaderLen));
+        }
 
         using var aes = new AesGcm(key, 16);
         aes.Encrypt(nonce, plaintext, ciphertext, tag, aad);
 
         return envelope;
+    }
+
+    [Theory]
+    [InlineData(42)]
+    [InlineData(123)]
+    [InlineData(999)]
+    public void RandomizedMutations_WithReproducibleSeed_AllReject(int seed)
+    {
+        var rng = new Random(seed);
+        byte[] key = new byte[32];
+        rng.NextBytes(key);
+        
+        for (int trial = 0; trial < 50; trial++)
+        {
+            int plaintextLen = rng.Next(0, 1024);
+            byte[] plaintext = new byte[plaintextLen];
+            rng.NextBytes(plaintext);
+            
+            int keyIdLen = rng.Next(0, 65);
+            byte[]? keyId = keyIdLen > 0 ? new byte[keyIdLen] : null;
+            if (keyId != null) rng.NextBytes(keyId);
+            
+            byte[] envelope = CreateValidEnvelope(key, plaintext, keyId ?? ReadOnlySpan<byte>.Empty);
+            
+            int mutationPos = rng.Next(0, envelope.Length);
+            byte originalByte = envelope[mutationPos];
+            envelope[mutationPos] ^= (byte)(1 << rng.Next(0, 8));
+            
+            try
+            {
+                AesGcmDecryptor.Decrypt(key, envelope);
+                Assert.Fail($"Seed={seed}, trial={trial}, pos={mutationPos}: mutation at byte {mutationPos} (0x{originalByte:X2} -> 0x{envelope[mutationPos]:X2}) did not reject");
+            }
+            catch (Exception ex) when (ex is ArgumentException or CryptographicException)
+            {
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(11)]
+    [InlineData(77)]
+    public void RandomizedPayloads_ValidRoundTrip_WithReproducibleSeed(int seed)
+    {
+        var rng = new Random(seed);
+        byte[] key = new byte[32];
+        rng.NextBytes(key);
+        
+        for (int trial = 0; trial < 100; trial++)
+        {
+            int plaintextLen = rng.Next(0, 2048);
+            byte[] plaintext = new byte[plaintextLen];
+            rng.NextBytes(plaintext);
+            
+            int keyIdLen = rng.Next(0, 65);
+            byte[]? keyId = keyIdLen > 0 ? new byte[keyIdLen] : null;
+            if (keyId != null) rng.NextBytes(keyId);
+            
+            byte[] envelope = CreateValidEnvelope(key, plaintext, keyId ?? ReadOnlySpan<byte>.Empty);
+
+            byte[] decrypted = AesGcmDecryptor.Decrypt(key, envelope);
+
+            Assert.Equal(plaintextLen, decrypted.Length);
+            Assert.True(plaintext.AsSpan().SequenceEqual(decrypted),
+                $"Seed={seed}, trial={trial}: plaintext mismatch");
+        }
+    }
+
+    [Fact]
+    public void LargePayload_DoesNotExceedReasonableBounds()
+    {
+        byte[] key = new byte[32];
+        RandomNumberGenerator.Fill(key);
+        
+        int maxPlaintext = 100 * 1024 * 1024;
+        byte[] plaintext = new byte[maxPlaintext];
+        
+        byte[] envelope = CreateValidEnvelope(key, plaintext);
+        
+        int expectedMaxSize = 22 + maxPlaintext + 16;
+        Assert.True(envelope.Length <= expectedMaxSize + 100, 
+            $"Envelope size {envelope.Length} exceeds reasonable bound {expectedMaxSize + 100}");
+
+        byte[] decrypted = AesGcmDecryptor.Decrypt(key, envelope);
+        Assert.Equal(maxPlaintext, decrypted.Length);
     }
 }

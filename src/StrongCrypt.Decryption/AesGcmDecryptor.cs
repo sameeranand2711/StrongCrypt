@@ -30,11 +30,11 @@ public static class AesGcmDecryptor
         var parsed = ParseEnvelope(envelope);
         
         byte[] plaintext = new byte[parsed.Ciphertext.Length];
-        
+
         using (var aes = new AesGcm(key, V1Constants.TagSize))
         {
-            Span<byte> combinedAAD = BuildAAD(parsed.ProtocolHeader, externalAAD);
-            
+            ReadOnlySpan<byte> combinedAAD = BuildAAD(parsed.ProtocolHeader, externalAAD);
+
             try
             {
                 aes.Decrypt(parsed.Nonce, parsed.Ciphertext, parsed.Tag, plaintext, combinedAAD);
@@ -77,11 +77,11 @@ public static class AesGcmDecryptor
             return false;
 
         Span<byte> plaintext = destination.Slice(0, parsed.Ciphertext.Length);
-        
+
         using (var aes = new AesGcm(key, V1Constants.TagSize))
         {
-            Span<byte> combinedAAD = BuildAAD(parsed.ProtocolHeader, externalAAD);
-            
+            ReadOnlySpan<byte> combinedAAD = BuildAAD(parsed.ProtocolHeader, externalAAD);
+
             try
             {
                 aes.Decrypt(parsed.Nonce, parsed.Ciphertext, parsed.Tag, plaintext, combinedAAD);
@@ -170,10 +170,10 @@ public static class AesGcmDecryptor
         return true;
     }
 
-    private static Span<byte> BuildAAD(ReadOnlySpan<byte> protocolHeader, ReadOnlySpan<byte> externalAAD)
+    private static ReadOnlySpan<byte> BuildAAD(ReadOnlySpan<byte> protocolHeader, ReadOnlySpan<byte> externalAAD)
     {
         if (externalAAD.IsEmpty)
-            return protocolHeader.ToArray();
+            return protocolHeader;
 
         Span<byte> combinedAAD = new byte[protocolHeader.Length + externalAAD.Length];
         protocolHeader.CopyTo(combinedAAD);
