@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Decryption-side tests. Deliberately does NOT reference
+    StrongCrypt.Encryption: the hostile-input parser must be testable from
+    hand-built byte vectors, not from the encryptor's own output. Cross-package
+    round-trip tests belong to the dedicated integration test project (SC-T05).
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/StrongCrypt.Decryption/StrongCrypt.Decryption.csproj" />
+  </ItemGroup>
+
+</Project>

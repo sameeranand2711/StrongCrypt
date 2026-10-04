@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    StrongCrypt.Encryption — AES-256-GCM encryption capability only.
+
+    BOUNDARY: this project must never reference StrongCrypt.Decryption and must
+    never contain decryption behaviour. Adding either requires human approval
+    (AGENT_GUARDRAILS.md, BOUNDARY-01).
+  -->
+  <PropertyGroup>
+    <Description>StrongCrypt V1 encryption-only library (AES-256-GCM). Contains no decryption capability.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../StrongCrypt.Protocol/StrongCrypt.Protocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

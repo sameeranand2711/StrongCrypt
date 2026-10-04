@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Encryption-side tests. Deliberately does NOT reference
+    StrongCrypt.Decryption: encryption behaviour must be verifiable without
+    decryption capability. Cross-package round-trip tests belong to the
+    dedicated integration test project (SC-T05).
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/StrongCrypt.Encryption/StrongCrypt.Encryption.csproj" />
+  </ItemGroup>
+
+</Project>

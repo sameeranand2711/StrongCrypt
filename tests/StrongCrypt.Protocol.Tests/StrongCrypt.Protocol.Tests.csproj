@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Tests for capability-neutral protocol metadata. -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/StrongCrypt.Protocol/StrongCrypt.Protocol.csproj" />
+  </ItemGroup>
+
+</Project>

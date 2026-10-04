@@ -1,0 +1,23 @@
+<Project>
+  <!--
+    Central Package Management.
+
+    V1 production runtime is BCL-only: no PackageVersion entry here may be a
+    runtime cryptography or native dependency. The entries below are the
+    approved test-only dependencies (xUnit + Microsoft test SDK).
+
+    Versions are pinned exactly. Adding a production runtime dependency
+    requires human approval (AGENT_GUARDRAILS.md, DEP-01).
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+  </ItemGroup>
+</Project>
