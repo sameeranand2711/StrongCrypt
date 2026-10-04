@@ -2,7 +2,7 @@
 
 **Opinionated, boundary-enforced AES-256-GCM encryption for .NET 10+**
 
-Version: **1.0.0-rc**
+Version: **1.0.0-rc.1**
 
 StrongCrypt provides physically separated encryption and decryption packages with a frozen wire format. Designed for scenarios where you want strong cryptographic boundaries, deterministic envelope format, and no accidental capability leakage.
 
