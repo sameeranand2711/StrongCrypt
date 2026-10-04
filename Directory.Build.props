@@ -9,7 +9,7 @@
   -->
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
 
     <!-- Explicit usings only: crypto code should show its dependencies. -->
@@ -34,6 +34,16 @@
 
     <!-- No implicit NuGet feed mutation during restore. -->
     <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
+
+    <!-- Package metadata -->
+    <Version>1.0.0-rc.1</Version>
+    <Authors>StrongCrypt Contributors</Authors>
+    <Copyright>Copyright © 2026</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/strongcrypt/strongcrypt</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/strongcrypt/strongcrypt</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>encryption;aes;gcm;cryptography;security</PackageTags>
   </PropertyGroup>
 
 </Project>
