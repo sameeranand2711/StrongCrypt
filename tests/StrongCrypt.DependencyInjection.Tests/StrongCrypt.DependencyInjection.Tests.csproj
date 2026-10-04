@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Minimal DI extension tests. Verifies registration and basic service resolution.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/StrongCrypt.Encryption/StrongCrypt.Encryption.csproj" />
+    <ProjectReference Include="../../src/StrongCrypt.Decryption/StrongCrypt.Decryption.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"  />
+  </ItemGroup>
+
+</Project>

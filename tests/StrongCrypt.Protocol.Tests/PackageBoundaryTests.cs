@@ -52,14 +52,21 @@ public sealed class PackageBoundaryTests
     [InlineData(ProtocolProject)]
     [InlineData(EncryptionProject)]
     [InlineData(DecryptionProject)]
-    public void Production_project_declares_no_nuget_package_reference(string projectFileName)
+    public void Production_project_declares_only_approved_package_references(string projectFileName)
     {
-        // V1 production runtime is BCL-only (SPEC.md). Adding a runtime
-        // dependency requires human approval under AGENT_GUARDRAILS.md DEP-01.
+        // V1 production runtime is BCL-only with one approved exception:
+        // Microsoft.Extensions.DependencyInjection.Abstractions for optional
+        // DI integration (approved 2026-10-05 for SC-T10).
+        // Adding other runtime dependencies requires human approval under
+        // AGENT_GUARDRAILS.md DEP-01.
+        
         IEnumerable<string> packages = ProjectElements(projectFileName, "PackageReference")
             .Select(static e => e.Attribute("Include")?.Value ?? string.Empty);
 
-        Assert.Empty(packages);
+        string[] approved = { "Microsoft.Extensions.DependencyInjection.Abstractions" };
+        IEnumerable<string> unapproved = packages.Except(approved);
+
+        Assert.Empty(unapproved);
     }
 
     private static List<string> ProjectReferencesOf(string projectFileName)

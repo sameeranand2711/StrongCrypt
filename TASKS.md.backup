@@ -74,7 +74,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 01
 - **Reviewer:** Agent 03
 - **Risk:** HIGH
-- **Status:** DONE
+- **Status:** PENDING
 - **Dependencies:** SC-T02
 - **Objective:** Implement safe AES-256-GCM encryption and canonical V1 envelope writing.
 - **In scope:** key validation; CSPRNG nonce generation; explicit 16-byte GCM tag; AAD/header binding; envelope serialization; span/destination API where justified; convenience API; focused unit tests; safe exceptions and zeroization of clearly owned temporary sensitive buffers.
@@ -95,7 +95,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 02
 - **Reviewer:** Agent 03
 - **Risk:** HIGH
-- **Status:** DONE
+- **Status:** PENDING
 - **Dependencies:** SC-T03
 - **Objective:** Implement independent hostile-input parsing, AES-256-GCM authentication/decryption, and fail-closed plaintext release.
 - **In scope:** envelope parser; checked arithmetic; canonical validation; unsupported version/profile handling; key-id extraction; AAD/header reconstruction; authentication; generic auth failure semantics; span/destination API where justified; malformed-input tests.
@@ -116,7 +116,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 02
 - **Reviewer:** Agent 03
 - **Risk:** HIGH
-- **Status:** DONE
+- **Status:** PENDING
 - **Dependencies:** SC-T04
 - **Objective:** Prove Encryption-produced V1 payloads are independently consumable by Decryption without implementation coupling and freeze durable compatibility fixtures.
 - **In scope:** round-trip integration tests; AAD tests; canonical fixed-key/fixed-input fixture generation through test-only controlled vectors; package-reference assertions; recognized AES-GCM known-answer vectors with documented source.
@@ -137,7 +137,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 02
 - **Reviewer:** Agent 03
 - **Risk:** HIGH
-- **Status:** DONE
+- **Status:** PENDING
 - **Dependencies:** SC-T05
 - **Objective:** Exercise hostile envelope input systematically without adding a heavy fuzzing dependency.
 - **In scope:** byte mutation across envelope regions; systematic truncation; invalid lengths; invalid reserved bits; unknown version/profile; trailing data policy; allocation/bounds assertions where practical; randomized synthetic payload loops with reproducible seeds on failure.
@@ -158,7 +158,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 01
 - **Reviewer:** Agent 03
 - **Risk:** HIGH
-- **Status:** DONE
+- **Status:** PENDING
 - **Dependencies:** SC-T06
 - **Objective:** Harden API ergonomics and implementation quality without changing frozen semantics.
 - **In scope:** API misuse review; buffer-size helpers if needed; disposal/lifetime review; avoidable allocation removal supported by measurement/reasoning; parallel-call tests for stateless APIs; XML docs; analyzers.
@@ -179,7 +179,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 01
 - **Reviewer:** Agent 03 (targeted security review of sample usage)
 - **Risk:** MEDIUM with security boundary
-- **Status:** DONE
+- **Status:** PENDING
 - **Dependencies:** SC-T07
 - **Objective:** Document correct consumption of encryption-only and decryption-only packages without teaching dangerous key/nonce practices.
 - **In scope:** README/docs; minimal sample snippets; package-boundary examples; AAD guidance; key-lifetime caveat; failure handling; explicit V1 non-goals.
@@ -198,7 +198,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 
 - **Owner:** Agent 03
 - **Risk:** HIGH
-- **Status:** DONE
+- **Status:** PENDING
 - **Dependencies:** SC-T08
 - **Objective:** Independently determine whether the local repository satisfies the approved V1 security contract and is ready for human release review.
 - **In scope:** package reference graph; public API surface; frozen protocol; threat-model invariants; secret/logging review; auth failure behavior; key/nonce/tag handling; adversarial tests; dependency list; build/tests; compatibility fixtures; docs claims.
@@ -210,45 +210,3 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **WRITE:** task/state/scope records only; implementation changes are prohibited for reviewer—route findings to owning builder for the single allowed remediation pass.
 - **PROTECTED:** all production code from direct reviewer modification; remote/release systems.
 - **Completion:** when PASS/PASS_WITH_NONBLOCKING_NOTES, set terminal state `ALL_APPROVED_WORK_COMPLETE`. Package publication/release still requires explicit human approval.
-
----
-
-## SC-T10 — Dependency injection extensions
-
-- **Owner:** Agent 04
-- **Reviewer:** Agent 03
-- **Risk:** HIGH
-- **Status:** READY
-- **Dependencies:** SC-T09
-- **Objective:** Implement two minimal, separate DI integration packages for encryption and decryption without duplicating V1 crypto implementation or violating capability separation.
-- **In scope:** `StrongCrypt.Encryption.DependencyInjection` and `StrongCrypt.Decryption.DependencyInjection`; idiomatic `IServiceCollection` extension methods; key-provider/factory registration adapters only if needed by existing V1 APIs; basic DI tests verifying capability separation and lifetime correctness; short usage docs.
-- **Exclusions:** combined DI package; cloud KMS/HSM dependencies; ASP.NET middleware; key storage implementation; protocol/crypto changes; V1 API redesign.
-- **Expected outputs:** Two physically separate DI packages with targeted tests and concise documentation.
-- **Acceptance criteria:** Encryption DI references only Encryption + Protocol + approved MS DI abstractions; Decryption DI references only Decryption + Protocol + approved MS DI abstractions; no cross-capability references; container tests verify separation; no secret exposure through configuration; chosen lifetimes are correct.
-- **Validation:** Build; targeted DI tests; relevant core regression; dependency graph inspection.
-- **READ:** V1 public APIs, constructors, existing key-provider patterns, project structure, root governance/state.
-- **WRITE:** `src/StrongCrypt.Encryption.DependencyInjection/**`, `src/StrongCrypt.Decryption.DependencyInjection/**`, their tests, solution/project wiring, usage docs, task/state files.
-- **PROTECTED:** V1 core implementations; frozen protocol; capability boundaries; unrelated files; secrets/credentials.
-- **Review gate:** Agent 03 independent targeted review required (key lifetime/secret handling focus).
-- **Done checklist:** tests pass; capability separation verified; review passed; one bounded remediation maximum; state/commit updated.
-
----
-
-## SC-T11 — Console demonstration application
-
-- **Owner:** Agent 05
-- **Reviewer:** Agent 03 (targeted security review)
-- **Risk:** MEDIUM with security boundary
-- **Status:** PENDING
-- **Dependencies:** SC-T10
-- **Objective:** Create one minimal console application demonstrating successful encrypt/decrypt round-trip using the DI extensions, with clear demo-only disclaimers.
-- **In scope:** `samples/StrongCrypt.ConsoleDemo/` console project; single readable `Program.cs` with ephemeral random demo key; DI registration using both extensions; encrypt/decrypt round-trip; clear PASS/FAIL output; demo-only warnings in README.
-- **Exclusions:** web app; CLI framework; database; cloud providers; file storage; benchmarking; production key embedding; additional abstractions; interactive prompts.
-- **Expected outputs:** Working console demo with self-verification.
-- **Acceptance criteria:** Demo builds and runs successfully; shows successful round-trip; uses ephemeral test key (no hard-coded production-like secrets); does not log key material; README warns combined capabilities are demo-only; production services should use only one package.
-- **Validation:** `dotnet build` and `dotnet run` showing PASS; targeted Agent 03 review of key handling.
-- **READ:** DI extension APIs; V1 core APIs; existing sample/project conventions.
-- **WRITE:** `samples/StrongCrypt.ConsoleDemo/**`, minimal solution wiring, demo README, task/state files.
-- **PROTECTED:** core packages; DI implementations; frozen contracts; unrelated files; secrets/production systems.
-- **Review gate:** Agent 03 targeted security review of sample key handling and references.
-- **Done checklist:** demo runs and shows PASS; review passed; disclaimers clear; state/commit updated; terminal state `ALL_APPROVED_WORK_COMPLETE`.
