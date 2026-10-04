@@ -376,7 +376,7 @@ See [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) for detailed security analysis.
 
 ## License
 
-[Add your license here]
+MIT License - see [LICENSE](LICENSE) for details.
 
 ## Support
 

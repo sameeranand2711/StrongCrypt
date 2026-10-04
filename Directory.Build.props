@@ -40,8 +40,8 @@
     <Authors>StrongCrypt Contributors</Authors>
     <Copyright>Copyright © 2026</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/strongcrypt/strongcrypt</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/strongcrypt/strongcrypt</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/sameeranand2711/StrongCrypt</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sameeranand2711/StrongCrypt</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>encryption;aes;gcm;cryptography;security</PackageTags>
   </PropertyGroup>
