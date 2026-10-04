@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrongCrypt.Integration.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrongCrypt.DependencyInjection.Tests", "tests\StrongCrypt.DependencyInjection.Tests\StrongCrypt.DependencyInjection.Tests.csproj", "{7DFD7588-36CF-44F5-8B53-22BB33B258A3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5D20AA90-6969-D8BD-9DCD-8634F4692FDA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrongCrypt.ConsoleDemo", "samples\StrongCrypt.ConsoleDemo\StrongCrypt.ConsoleDemo.csproj", "{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +133,18 @@ Global
 		{7DFD7588-36CF-44F5-8B53-22BB33B258A3}.Release|x64.Build.0 = Release|Any CPU
 		{7DFD7588-36CF-44F5-8B53-22BB33B258A3}.Release|x86.ActiveCfg = Release|Any CPU
 		{7DFD7588-36CF-44F5-8B53-22BB33B258A3}.Release|x86.Build.0 = Release|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Debug|x64.Build.0 = Debug|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Debug|x86.Build.0 = Debug|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Release|x64.ActiveCfg = Release|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Release|x64.Build.0 = Release|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Release|x86.ActiveCfg = Release|Any CPU
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,5 +158,6 @@ Global
 		{65E7AFE3-7902-4A61-89CA-EF89841F5B4B} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{E90F474D-C282-40F1-B9B7-392A6E1AE7AD} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{7DFD7588-36CF-44F5-8B53-22BB33B258A3} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{D2336552-EC01-46EE-BB50-A2DA7E3E64AA} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 	EndGlobalSection
 EndGlobal

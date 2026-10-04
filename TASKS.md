@@ -239,7 +239,7 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **Owner:** Agent 05
 - **Reviewer:** Agent 03 (targeted security review)
 - **Risk:** MEDIUM with security boundary
-- **Status:** PENDING
+- **Status:** DONE
 - **Dependencies:** SC-T10
 - **Objective:** Create one minimal console application demonstrating successful encrypt/decrypt round-trip using the DI extensions, with clear demo-only disclaimers.
 - **In scope:** `samples/StrongCrypt.ConsoleDemo/` console project; single readable `Program.cs` with ephemeral random demo key; DI registration using both extensions; encrypt/decrypt round-trip; clear PASS/FAIL output; demo-only warnings in README.
@@ -252,3 +252,4 @@ All external side-effect authority is `NONE` unless explicitly stated. Local rep
 - **PROTECTED:** core packages; DI implementations; frozen contracts; unrelated files; secrets/production systems.
 - **Review gate:** Agent 03 targeted security review of sample key handling and references.
 - **Done checklist:** demo runs and shows PASS; review passed; disclaimers clear; state/commit updated; terminal state `ALL_APPROVED_WORK_COMPLETE`.
+- **Completion:** 2026-10-05. Console demo with ephemeral CSPRNG key, DI integration, round-trip verification, key zeroing; Agent 03 review PASS (key handling, warnings, capability separation all verified).
